@@ -38,7 +38,9 @@ class Promotion:
 
 @dataclass(frozen=True)
 class EventOutcome:
-    event: Event
+    """Events that begin on the same day form one outcome."""
+
+    events: tuple[Event, ...]
     first_dataset_drift: int | None
     first_retrain: int | None
     promotions: tuple[Promotion, ...]
@@ -65,20 +67,21 @@ def learned(usecase: UseCase, promoted_on: date, event_day: date, source: DataSo
 
 
 def outcomes(usecase: UseCase, decisions: list[dict[str, Any]]) -> list[EventOutcome]:
-    """Each calendar event with what the loop did after it."""
+    """Each calendar day on which events began, with what the loop did after it."""
     if not decisions:
         raise ValueError(f"{usecase.name}: no decisions in the promotion log")
-    events = sorted(usecase.scenario.events, key=lambda e: e.day)
+    days = sorted({e.day for e in usecase.scenario.events})
+    groups = {d: tuple(e for e in usecase.scenario.events if e.day == d) for d in days}
     source = DataSource(usecase, usecase.scenario)
     start = usecase.scenario.start
 
-    def owner(index: int) -> Event | None:
-        begun = [e for e in events if e.day <= index]
+    def owner(index: int) -> int | None:
+        begun = [d for d in days if d <= index]
         return begun[-1] if begun else None
 
     result = []
-    for event in events:
-        after = [d for d in decisions if _index(usecase, d["day"]) >= event.day]
+    for event_day in days:
+        after = [d for d in decisions if _index(usecase, d["day"]) >= event_day]
         drift = next((d for d in after if d["drift"]["detected"]), None)
         retrain = next((d for d in after if d["retrained"]), None)
         promotions = tuple(
@@ -87,17 +90,17 @@ def outcomes(usecase: UseCase, decisions: list[dict[str, Any]]) -> list[EventOut
                 learned=learned(
                     usecase,
                     date.fromisoformat(d["day"]),
-                    start + timedelta(days=event.day),
+                    start + timedelta(days=event_day),
                     source,
                 ),
                 reason=d["reason"],
             )
             for d in decisions
-            if d["promoted"] and owner(_index(usecase, d["day"])) is event
+            if d["promoted"] and owner(_index(usecase, d["day"])) == event_day
         )
         result.append(
             EventOutcome(
-                event=event,
+                events=groups[event_day],
                 first_dataset_drift=None if drift is None else _index(usecase, drift["day"]),
                 first_retrain=None if retrain is None else _index(usecase, retrain["day"]),
                 promotions=promotions,
@@ -108,6 +111,11 @@ def outcomes(usecase: UseCase, decisions: list[dict[str, Any]]) -> list[EventOut
 
 def _count(n: int, noun: str) -> str:
     return f"{n} {noun}" if n == 1 else f"{n} {noun}s"
+
+
+def _number(value: float) -> str:
+    """Whole numbers above 1 are counts and print as integers; other values keep 4 decimals."""
+    return str(int(value)) if value > 1 and value == int(value) else f"{value:.4f}"
 
 
 def _day(value: int | None) -> str:
@@ -136,12 +144,15 @@ def section(usecase: UseCase, decisions: list[dict[str, Any]], model_card: str) 
         "|---|---|---|---|---|---|",
     ]
     for o in found:
-        label = f"{o.event.name} (benign)" if o.event.benign else o.event.name
+        label = " + ".join(e.name for e in o.events)
+        if all(e.benign for e in o.events):
+            label += " (benign)"
+        kinds = " + ".join(dict.fromkeys(e.kind for e in o.events))
         lines.append(
-            f"| {label} | {o.event.day} | {o.event.kind} | {_day(o.first_dataset_drift)} | "
+            f"| {label} | {o.events[0].day} | {kinds} | {_day(o.first_dataset_drift)} | "
             f"{_day(o.first_retrain)} | {_promotions(o.promotions)} |"
         )
-    benign = [o for o in found if o.event.benign]
+    benign = [o for o in found if all(e.benign for e in o.events)]
     lines.append("")
     for o in benign:
         detected = o.first_retrain is not None or o.first_dataset_drift is not None
@@ -154,7 +165,7 @@ def section(usecase: UseCase, decisions: list[dict[str, Any]], model_card: str) 
             "",
             f"No promotion is expected for the real events here. {usecase.rule8_exception}",
         ]
-    metrics = ", ".join(f"{k} {v:.4f}" for k, v in last["live_metrics"].items())
+    metrics = ", ".join(f"{k} {_number(v)}" for k, v in last["live_metrics"].items())
     lines += [
         "",
         f"Day {_index(usecase, last['day'])}: live model v{last['live_version']}, {metrics}.",

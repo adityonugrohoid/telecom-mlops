@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,7 +22,7 @@ def decisions(tmp_path_factory: pytest.TempPathFactory) -> list[dict[str, object
 def test_the_concept_event_promotes_on_learned_data_and_the_benign_one_never(
     decisions: list[dict[str, object]],
 ) -> None:
-    found = {o.event.name: o for o in outcomes(ToyUseCase(), decisions)}
+    found = {o.events[0].name: o for o in outcomes(ToyUseCase(), decisions)}
     concept, benign = found["threshold_moves"], found["z_shift"]
     assert concept.promotions
     assert all(p.learned for p in concept.promotions)
@@ -46,6 +47,17 @@ def test_summary_opens_with_the_simulated_data_statement(
     assert text.splitlines()[0] == SIMULATED
     assert "| z_shift (benign) | 20 |" in text
     assert "Benign event: detected, 0 promotions." in text
+
+
+def test_events_starting_the_same_day_share_one_row(decisions: list[dict[str, object]]) -> None:
+    class SameDay(ToyUseCase):
+        scenario = replace(
+            TOY_SCENARIO,
+            events=(*TOY_SCENARIO.events, replace(TOY_SCENARIO.events[0], name="twin")),
+        )
+
+    text = summary([(SameDay(), decisions, "card")])
+    assert "| threshold_moves + twin | 5 | concept |" in text
 
 
 def test_rule8_exception_is_read_from_the_use_case(decisions: list[dict[str, object]]) -> None:
