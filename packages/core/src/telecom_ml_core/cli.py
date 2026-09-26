@@ -16,6 +16,7 @@ from pathlib import Path
 
 from telecom_ml_core.contract import UseCase
 from telecom_ml_core.drift import EvidentlyDrift
+from telecom_ml_core.evaluate import HoldoutEvaluator, RolloutEvaluator
 from telecom_ml_core.pipeline import Components, run_loop
 from telecom_ml_core.registry import MlflowRegistry, sqlite_uri
 from telecom_ml_core.validate import SchemaValidator
@@ -24,6 +25,9 @@ ENTRY_POINT_GROUP = "telecom_ml.usecases"
 DEFAULT_STATE_DIR = Path("state")
 # Evidently's default: the dataset drifts when half the monitored columns do.
 DRIFT_SHARE = 0.5
+# Fixed episodes every policy runs on each environment version (generator spec, netopt).
+ROLLOUT_EPISODES = 50
+ROLLOUT_SEED = 1000
 
 log = logging.getLogger(__name__)
 
@@ -47,20 +51,22 @@ def build_components(state_dir: Path) -> Components:
     Args:
         state_dir: Folder holding run state (never committed).
 
-    Raises:
-        NotImplementedError: until the holdout and rollout evaluators land.
+    Returns:
+        Validator, drift detector, both evaluators and the MLflow registry.
     """
     state_dir.mkdir(parents=True, exist_ok=True)
-    validator = SchemaValidator()
-    drift = EvidentlyDrift(drift_share=DRIFT_SHARE)
-    registry = MlflowRegistry(
-        tracking_uri=sqlite_uri(state_dir),
-        artifact_root=state_dir / "mlartifacts",
-        log_dir=state_dir / "promotion_log",
-    )
-    raise NotImplementedError(
-        f"evaluators are not wired yet; {type(validator).__name__}, {type(drift).__name__} "
-        f"and {type(registry).__name__} are ready under {state_dir}"
+    return Components(
+        validator=SchemaValidator(),
+        drift=EvidentlyDrift(drift_share=DRIFT_SHARE),
+        evaluators={
+            "holdout": HoldoutEvaluator(),
+            "rollout": RolloutEvaluator(episodes=ROLLOUT_EPISODES, seed=ROLLOUT_SEED),
+        },
+        registry=MlflowRegistry(
+            tracking_uri=sqlite_uri(state_dir),
+            artifact_root=state_dir / "mlartifacts",
+            log_dir=state_dir / "promotion_log",
+        ),
     )
 
 

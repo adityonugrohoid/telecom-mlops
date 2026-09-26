@@ -6,10 +6,11 @@ import pandas as pd
 import pytest
 from telecom_ml_core.contract import LABEL_RELEASE, Batch, LiveRecord
 from telecom_ml_core.drift import EvidentlyDrift
+from telecom_ml_core.evaluate import HoldoutEvaluator
 from telecom_ml_core.pipeline import Components, run_loop
 from telecom_ml_core.registry import MlflowRegistry, sqlite_uri
 from telecom_ml_core.validate import BatchValidationError, SchemaValidator
-from toy import START, TOY_SCENARIO, Threshold, ToyUseCase, WindowEvaluator
+from toy import START, TOY_SCENARIO, Threshold, ToyUseCase
 
 
 def registry_at(state: Path) -> MlflowRegistry:
@@ -108,7 +109,7 @@ def test_registry_refuses_a_version_out_of_step(tmp_path: Path) -> None:
 
 def real_components(state: Path) -> Components:
     return Components(
-        SchemaValidator(), EvidentlyDrift(0.5), {"holdout": WindowEvaluator()}, registry_at(state)
+        SchemaValidator(), EvidentlyDrift(0.5), {"holdout": HoldoutEvaluator()}, registry_at(state)
     )
 
 
