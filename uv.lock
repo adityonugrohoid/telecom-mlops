@@ -26,6 +26,7 @@ members = [
     "telecom-ml-capacity",
     "telecom-ml-churn",
     "telecom-ml-core",
+    "telecom-ml-netopt",
     "telecom-ml-qoe",
     "telecom-ml-root-cause",
     "telecom-mlops",
@@ -4133,6 +4134,17 @@ requires-dist = [
 ]
 
 [[package]]
+name = "telecom-ml-netopt"
+version = "0.1.0"
+source = { editable = "packages/netopt" }
+dependencies = [
+    { name = "telecom-ml-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "telecom-ml-core", editable = "packages/core" }]
+
+[[package]]
 name = "telecom-ml-qoe"
 version = "0.1.0"
 source = { editable = "packages/qoe" }
@@ -4175,6 +4187,7 @@ dependencies = [
     { name = "telecom-ml-capacity" },
     { name = "telecom-ml-churn" },
     { name = "telecom-ml-core" },
+    { name = "telecom-ml-netopt" },
     { name = "telecom-ml-qoe" },
     { name = "telecom-ml-root-cause" },
 ]
@@ -4202,6 +4215,7 @@ requires-dist = [
     { name = "telecom-ml-capacity", editable = "packages/capacity" },
     { name = "telecom-ml-churn", editable = "packages/churn" },
     { name = "telecom-ml-core", editable = "packages/core" },
+    { name = "telecom-ml-netopt", editable = "packages/netopt" },
     { name = "telecom-ml-qoe", editable = "packages/qoe" },
     { name = "telecom-ml-root-cause", editable = "packages/root-cause" },
 ]
