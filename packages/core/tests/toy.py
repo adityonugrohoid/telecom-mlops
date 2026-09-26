@@ -7,7 +7,6 @@ day 20 (benign: detectable, harmless).
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any
@@ -28,7 +27,6 @@ from telecom_ml_core.contract import (
     UseCase,
     rng_for_day,
 )
-from telecom_ml_core.pipeline import DataSource
 
 START = date(2026, 1, 1)
 ROWS_PER_DAY = 400
@@ -129,21 +127,6 @@ class MeanShiftDrift:
         shift = ((current.mean() - reference.mean()).abs() / reference.std()).to_dict()
         drifted = [name for name, value in shift.items() if value > 0.5]
         return DriftResult(bool(drifted), len(drifted) / len(shift), shift, tuple(drifted))
-
-
-class WindowEvaluator:
-    """Chronological holdout: train on the releases before the eval window, score on it."""
-
-    def training_data(self, usecase: UseCase, day: date, source: DataSource) -> pd.DataFrame:
-        last = day - timedelta(days=usecase.eval_window_days)
-        first = last - timedelta(days=usecase.train_window_days - 1)
-        return source.released(first, last)
-
-    def evaluate(
-        self, usecase: UseCase, models: Mapping[str, Any], day: date, source: DataSource
-    ) -> dict[str, Metrics]:
-        frame = source.released(day - timedelta(days=usecase.eval_window_days - 1), day)
-        return {name: usecase.score(model, frame) for name, model in models.items()}
 
 
 class MemoryRegistry:

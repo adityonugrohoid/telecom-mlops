@@ -4,6 +4,7 @@ import pandas as pd
 import pandera.errors
 import pytest
 from telecom_ml_core.contract import LABEL_RELEASE, Batch, Scenario
+from telecom_ml_core.evaluate import HoldoutEvaluator
 from telecom_ml_core.pipeline import Components, DataSource, run_loop
 from toy import (
     LABEL_DELAY_DAYS,
@@ -13,7 +14,6 @@ from toy import (
     MemoryRegistry,
     SchemaValidator,
     ToyUseCase,
-    WindowEvaluator,
 )
 
 
@@ -21,7 +21,7 @@ def components(registry: MemoryRegistry) -> Components:
     return Components(
         validator=SchemaValidator(),
         drift=MeanShiftDrift(),
-        evaluators={"holdout": WindowEvaluator()},
+        evaluators={"holdout": HoldoutEvaluator()},
         registry=registry,
     )
 
