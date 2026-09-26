@@ -23,6 +23,7 @@ from telecom_ml_core.contract import (
     Batch,
     DayDecision,
     DriftResult,
+    DriftTest,
     EvaluationKind,
     LiveRecord,
     Metrics,
@@ -71,7 +72,9 @@ class Validator(Protocol):
 
 
 class DriftDetector(Protocol):
-    def check(self, reference: pd.DataFrame, current: pd.DataFrame) -> DriftResult: ...
+    def check(
+        self, reference: pd.DataFrame, current: pd.DataFrame, numeric_test: DriftTest
+    ) -> DriftResult: ...
 
 
 class Evaluator(Protocol):
@@ -136,7 +139,9 @@ def run_day(usecase: UseCase, day: date, components: Components, source: DataSou
     components.validator.validate(usecase, batch)
 
     # 3. drift against the live model's reference
-    drift = components.drift.check(live.reference, usecase.drift_frame(batch.data))
+    drift = components.drift.check(
+        live.reference, usecase.drift_frame(batch.data), usecase.drift_test
+    )
 
     # 4. score the live model
     live_metrics = evaluator.evaluate(usecase, {"live": live.model}, day, source)["live"]
