@@ -58,6 +58,7 @@ class RootCauseUseCase(UseCase):
     name = "root-cause"
     usecase_id = generator.USECASE_ID
     evaluation = "holdout"
+    drift_test = "auto"
     max_label_delay_days = generator.MAX_LABEL_DELAY_DAYS
     train_window_days = 30
     eval_window_days = 21

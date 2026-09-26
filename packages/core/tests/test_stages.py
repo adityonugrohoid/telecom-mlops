@@ -54,7 +54,7 @@ def frames(shift: float) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def test_same_distribution_does_not_drift() -> None:
-    result = EvidentlyDrift(drift_share=0.5).check(*frames(0.0))
+    result = EvidentlyDrift(drift_share=0.5).check(*frames(0.0), "auto")
     assert not result.detected
     assert result.drifted == ()
     assert set(result.per_feature) == {"a", "b"}
@@ -62,15 +62,28 @@ def test_same_distribution_does_not_drift() -> None:
 
 def test_shifted_column_is_named_and_share_decides_detection() -> None:
     reference, current = frames(1.0)
-    result = EvidentlyDrift(drift_share=0.5).check(reference, current)
+    result = EvidentlyDrift(drift_share=0.5).check(reference, current, "auto")
     assert (result.detected, result.share_drifted, result.drifted) == (True, 0.5, ("a",))
-    assert not EvidentlyDrift(drift_share=0.9).check(reference, current).detected
+    assert not EvidentlyDrift(drift_share=0.9).check(reference, current, "auto").detected
+
+
+def test_ks_keeps_small_same_distribution_days_quiet() -> None:
+    rng = np.random.default_rng(3)
+    reference = pd.DataFrame({"a": rng.normal(0, 1, 1500), "b": rng.normal(0, 1, 1500)})
+    days = [pd.DataFrame({"a": rng.normal(0, 1, 50), "b": rng.normal(0, 1, 50)}) for _ in range(20)]
+    detector = EvidentlyDrift(drift_share=0.5)
+    flagged = {
+        test: sum(detector.check(reference, day, test).detected for day in days)
+        for test in ("auto", "ks")
+    }
+    assert flagged["ks"] <= 2
+    assert flagged["auto"] > flagged["ks"]
 
 
 def test_drift_rejects_mismatched_columns() -> None:
     reference, current = frames(0.0)
     with pytest.raises(ValueError, match="drift columns differ"):
-        EvidentlyDrift(0.5).check(reference, current[["b"]])
+        EvidentlyDrift(0.5).check(reference, current[["b"]], "auto")
 
 
 def record(version: int) -> LiveRecord:

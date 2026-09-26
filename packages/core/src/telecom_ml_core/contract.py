@@ -19,6 +19,10 @@ import yaml
 
 EventKind = Literal["covariate", "concept", "prior", "new_class", "dynamics", "trend"]
 EvaluationKind = Literal["holdout", "rollout"]
+# Numeric drift test: "auto" lets Evidently choose by sample size (Wasserstein distance once
+# the reference passes 1,000 rows); "ks" is the two-sample Kolmogorov-Smirnov test, which
+# accounts for the size of a small daily frame.
+DriftTest = Literal["auto", "ks"]
 
 # Column every batch carries: the simulated date on which that row's label becomes known.
 LABEL_RELEASE = "label_released_on"
@@ -210,6 +214,7 @@ class UseCase(ABC):
     name: str
     usecase_id: int
     evaluation: EvaluationKind
+    drift_test: DriftTest
     # Longest label delay in days; the core looks this far back to collect released labels.
     max_label_delay_days: int
     train_window_days: int

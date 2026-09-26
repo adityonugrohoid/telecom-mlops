@@ -42,6 +42,7 @@ class ChurnUseCase(UseCase):
     name = "churn"
     usecase_id = generator.USECASE_ID
     evaluation = "holdout"
+    drift_test = "auto"
     max_label_delay_days = generator.LABEL_DELAY_DAYS
     train_window_days = 30
     eval_window_days = 14

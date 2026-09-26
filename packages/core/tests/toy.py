@@ -55,6 +55,7 @@ class ToyUseCase(UseCase):
     name = "toy"
     usecase_id = 99
     evaluation = "holdout"
+    drift_test = "auto"
     max_label_delay_days = LABEL_DELAY_DAYS
     train_window_days = 5
     eval_window_days = 3
@@ -123,7 +124,9 @@ class SchemaValidator:
 class MeanShiftDrift:
     """Drift when any feature's mean moves more than half a reference standard deviation."""
 
-    def check(self, reference: pd.DataFrame, current: pd.DataFrame) -> DriftResult:
+    def check(
+        self, reference: pd.DataFrame, current: pd.DataFrame, numeric_test: str
+    ) -> DriftResult:
         shift = ((current.mean() - reference.mean()).abs() / reference.std()).to_dict()
         drifted = [name for name, value in shift.items() if value > 0.5]
         return DriftResult(bool(drifted), len(drifted) / len(shift), shift, tuple(drifted))

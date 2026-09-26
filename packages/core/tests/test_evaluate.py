@@ -39,6 +39,7 @@ class Bandit(UseCase):
     name = "bandit"
     usecase_id = 98
     evaluation = "rollout"
+    drift_test = "auto"
     max_label_delay_days = 0
     train_window_days = 1
     eval_window_days = 1
