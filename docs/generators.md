@@ -141,10 +141,18 @@ each use case simulates.
 
 - Batch: 1,500 sessions per day. Label delay: 0 (MOS is measured with the session).
 - Model of the data: the earlier session model (app mix, device class, radio KPIs to MOS).
-- Events: day 40, device mix: high-end share 0.3 to 0.5 over 30 days (covariate). Day 90,
-  a video codec change: the same throughput gives higher MOS for video (concept). Day 150,
-  benign: gaming share +5 points.
-- Promotion: MAE on the last 7 days beats the live model.
+- Events: day 40, benign: device mix, high-end share 0.3 to 0.5 over 30 days. MOS saturates
+  with throughput, so the model does not get these sessions wrong (a gaming-share change was
+  harmless the same way). Day 90, a video codec change: video MOS is computed from three
+  times the effective throughput (concept; at two times the gain was under twice the noise
+  margin). Day 150, a new app class `cloud_gaming` at 10% of sessions (new_class): it needs
+  four times the throughput for the same picture and pays twice local gaming's latency
+  penalty; its one-hot column exists from day 0. Draws that exist only for scenario events
+  come from a child random stream, so adding an event never changes the other sessions.
+- Drift: one row per session. Retrain on dataset drift, or MAE 0.02 above its value at
+  promotion.
+- Promotion: MAE on the last 7 days beats the live model by 0.0074 (twice the largest noise
+  improvement, 0.0037).
 
 ### capacity
 
