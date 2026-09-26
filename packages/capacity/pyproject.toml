@@ -1,0 +1,23 @@
+[project]
+name = "telecom-ml-capacity"
+version = "0.1.0"
+description = "Capacity use case: dated cell-hour traffic generator, drift calendar, 7-day LightGBM forecaster and seasonal naive baseline"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "telecom-ml-core",
+    "lightgbm>=4.7",
+]
+
+[project.entry-points."telecom_ml.usecases"]
+capacity = "telecom_ml_capacity.usecase:CapacityUseCase"
+
+[tool.uv.sources]
+telecom-ml-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/telecom_ml_capacity"]

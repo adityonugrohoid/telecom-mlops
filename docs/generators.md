@@ -157,13 +157,23 @@ each use case simulates.
 ### capacity
 
 - Batch: 60 cells x 24 hours per day. Label delay: 0 (actual traffic arrives each hour);
-  forecasts are made 7 days ahead.
-- Model of the data: the earlier diurnal x weekly x growth model with special events.
-- Events: continuous growth of 2% per month (trend). Day 70, 15 cells move to 5% per month
-  growth (trend: new demand in their area). Day 130, a holiday week: traffic x1.8 on 30% of
-  cells for 7 days, then back (benign if the model is not retrained on it).
-- Promotion: MAPE on the last 14 days beats the live model and the seasonal naive forecast.
-  Chronological splits only.
+  forecasts are made 7 days ahead, and each row carries the same cell and hour 7, 8 and 14
+  days earlier and the mean over days 7 to 13.
+- Model of the data: the earlier diurnal x weekly traffic model with special events. Its
+  hourly random-walk drift has no bound in time; a slow per-cell daily level (AR(1), 0.97 a
+  day, standard deviation 0.04) on a child stream takes its place.
+- Events: growth is scenario data. Every cell grows 2% a month (a ramp from day 0). Day 70,
+  15 cells move to 5% a month (new demand in their area). Day 130, a holiday week: traffic x1.8
+  on 30% of cells for 7 days, then back (benign).
+- Exception to the rule 8 promotion expectation: a forecaster on same-hour lags tracks growth
+  through its lags, so the growth events are detected and may retrain, but a new model is not
+  expected to win. The use case's demonstration is the holiday week: models retrained on it
+  forecast worse afterwards, and the gate refuses them.
+- Drift: one row per cell per day, the day's traffic over the same weekday 7 and 14 days
+  earlier (weekday-neutral), with the KS test. Retrain triggers: dataset drift, or MAPE 2
+  points above its value at promotion.
+- Promotion: MAPE on the last 14 days beats the live model by 0.315 points (twice the largest
+  noise improvement) and beats the seasonal naive forecast. Chronological splits only.
 
 ### netopt
 
