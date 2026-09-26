@@ -128,7 +128,7 @@ class MeanShiftDrift:
     def check(self, reference: pd.DataFrame, current: pd.DataFrame) -> DriftResult:
         shift = ((current.mean() - reference.mean()).abs() / reference.std()).to_dict()
         drifted = [name for name, value in shift.items() if value > 0.5]
-        return DriftResult(bool(drifted), len(drifted) / len(shift), shift)
+        return DriftResult(bool(drifted), len(drifted) / len(shift), shift, tuple(drifted))
 
 
 class WindowEvaluator:

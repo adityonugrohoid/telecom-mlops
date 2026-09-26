@@ -158,9 +158,12 @@ class Batch:
 
 @dataclass(frozen=True)
 class DriftResult:
+    """`per_feature` holds each column's test value; `drifted` names the columns that moved."""
+
     detected: bool
     share_drifted: float
     per_feature: dict[str, float]
+    drifted: tuple[str, ...]
 
 
 @dataclass(frozen=True)

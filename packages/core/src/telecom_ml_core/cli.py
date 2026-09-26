@@ -15,10 +15,15 @@ from importlib.metadata import entry_points
 from pathlib import Path
 
 from telecom_ml_core.contract import UseCase
+from telecom_ml_core.drift import EvidentlyDrift
 from telecom_ml_core.pipeline import Components, run_loop
+from telecom_ml_core.registry import MlflowRegistry, sqlite_uri
+from telecom_ml_core.validate import SchemaValidator
 
 ENTRY_POINT_GROUP = "telecom_ml.usecases"
 DEFAULT_STATE_DIR = Path("state")
+# Evidently's default: the dataset drifts when half the monitored columns do.
+DRIFT_SHARE = 0.5
 
 log = logging.getLogger(__name__)
 
@@ -43,11 +48,19 @@ def build_components(state_dir: Path) -> Components:
         state_dir: Folder holding run state (never committed).
 
     Raises:
-        NotImplementedError: until the validate, drift, registry and evaluator stages land.
+        NotImplementedError: until the holdout and rollout evaluators land.
     """
+    state_dir.mkdir(parents=True, exist_ok=True)
+    validator = SchemaValidator()
+    drift = EvidentlyDrift(drift_share=DRIFT_SHARE)
+    registry = MlflowRegistry(
+        tracking_uri=sqlite_uri(state_dir),
+        artifact_root=state_dir / "mlartifacts",
+        log_dir=state_dir / "promotion_log",
+    )
     raise NotImplementedError(
-        f"no production components yet for {state_dir}: validate, drift, registry and the "
-        "evaluators are not wired in this version"
+        f"evaluators are not wired yet; {type(validator).__name__}, {type(drift).__name__} "
+        f"and {type(registry).__name__} are ready under {state_dir}"
     )
 
 
