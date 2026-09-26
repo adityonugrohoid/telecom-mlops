@@ -1,0 +1,24 @@
+# Churn drift calendar (docs/generators.md). Parameter names match generator.BASE_PARAMS;
+# each value is where the parameter ends once the event has ramped in.
+start: 2026-01-01
+days: 180
+base_seed: 42
+events:
+  - name: price_rise_charges
+    day: 60
+    ramp_days: 14
+    kind: covariate
+    params: {mtm_charge_mult: 1.15}
+    benign: false
+  - name: price_rise_sensitivity
+    day: 60
+    ramp_days: 14
+    kind: concept
+    params: {charge_coef: 2.0}
+    benign: false
+  - name: fiveg_share_growth
+    day: 150
+    ramp_days: 20
+    kind: covariate
+    params: {share_5g: 0.7}
+    benign: true

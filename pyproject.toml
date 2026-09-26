@@ -5,7 +5,7 @@ description = "Six telecom ML use cases on one MLOps pipeline with a simulated d
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-dependencies = ["telecom-ml-core"]
+dependencies = ["telecom-ml-core", "telecom-ml-churn"]
 
 [tool.uv]
 package = false
@@ -15,13 +15,22 @@ members = ["packages/*"]
 
 [tool.uv.sources]
 telecom-ml-core = { workspace = true }
+telecom-ml-churn = { workspace = true }
 
 [dependency-groups]
 dev = [
+    "ipykernel>=6.29",
+    "jupytext>=1.16",
+    "matplotlib>=3.9",
     "mypy>=1.13",
+    "nbmake>=1.5",
+    "nbstripout>=0.8",
     "pandas-stubs>=2.2",
     "pytest>=8.3",
     "ruff>=0.8",
+    "scipy>=1.14",
+    "shap>=0.52",
+    "time-machine>=2.16",
     "types-pyyaml>=6.0",
 ]
 
