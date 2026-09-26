@@ -114,15 +114,28 @@ each use case simulates.
 
 ### anomaly
 
-- Batch: 50 cells x 24 hours per day. Label delay: 1 day (network operations triage).
+- Batch: 50 cells x 24 hours per day. Labels come from triage: an hour is labelled, one day
+  later, only if the Isolation Forest or the live detector alerted on it or it falls in a
+  random 20% audit sample. Other hours stay unlabelled and never enter training or scoring.
+  Models are scored on the audit sample only.
 - Model of the data: the earlier per-cell hourly profiles with injected anomalies
   (traffic_spike, sinr_drop, latency_surge, throughput_collapse; 5% of hours).
-- Events: day 50, capacity upgrade on 20% of cells: throughput baseline +30%, latency
-  baseline -20% (covariate; raises false alerts). Day 110, a new anomaly type
-  `intermittent_outage` (short repeated drops) at 1% (new_class). Day 150, benign: the
-  weekend traffic profile is smoothed.
-- Promotion: F1 on labels released in the last 14 days beats the live model, and the alert
-  rate on normal hours does not rise.
+- Model: a supervised detector (gradient boosting on the 16 features plus the Isolation
+  Forest score, the forest refit per window) trained on triage labels. Baseline: the earlier
+  unsupervised Isolation Forest, unchanged. An unsupervised model cannot learn a new anomaly
+  type: its recall on the outage type was 0.024 before retraining and 0.048 after.
+- Events: day 50, demand growth on 20% of cells: traffic, users and latency x1.8 (covariate;
+  the normal baseline moves toward congestion and a stale detector raises false alerts). A
+  capacity upgrade (throughput up, latency down) was tried first and hurt no model. Day 110,
+  a new anomaly type `intermittent_outage` at 1% of hours (new_class): traffic and users fall
+  away while radio conditions look normal. Day 155, benign: the weekend traffic dip is
+  smoothed away.
+- Audit share: at 10% the noise from retraining alone (F1 +0.036) hid the outage's gain
+  (about +0.04); at 20% the noise halves (+0.0215).
+- Drift: one row per cell per day, the KS test. Retrain triggers: dataset drift, F1 0.05
+  below its value at promotion, alerts on normal hours 0.005 above it.
+- Promotion: F1 beats the live model by 0.043, and alerts on normal hours rise by no more
+  than 0.0038 (each twice its noise), on the audit sample of the last 14 days.
 
 ### qoe
 
