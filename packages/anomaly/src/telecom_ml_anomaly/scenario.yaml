@@ -1,0 +1,24 @@
+# Anomaly drift calendar (docs/generators.md). Parameter names match
+# generator.BASE_PARAMS; each value is where the parameter ends once the event has ramped in.
+start: 2026-01-01
+days: 180
+base_seed: 42
+events:
+  - name: demand_growth
+    day: 50
+    ramp_days: 0
+    kind: covariate
+    params: {grown_share: 0.2}
+    benign: false
+  - name: intermittent_outages
+    day: 110
+    ramp_days: 0
+    kind: new_class
+    params: {outage_rate: 0.01}
+    benign: false
+  - name: weekend_profile_smoothed
+    day: 155
+    ramp_days: 0
+    kind: covariate
+    params: {weekend_factor: 1.0}
+    benign: true
