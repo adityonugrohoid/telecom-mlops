@@ -177,16 +177,32 @@ each use case simulates.
 
 ### netopt
 
-- Batch: one environment version per day: the earlier generator's transition dynamics and
-  reward (load, SINR, interference, throughput, latency; five actions), with scenario
-  parameters on the dynamics. Label delay: none; the policy is judged by rollouts.
-- Events: day 60, mean load +20% over 21 days (dynamics). Day 120, a neighbour outage on
-  10% of cells: interference and load rise there, and load_balance is worth more
-  (dynamics). Day 160, benign: measurement noise on SINR doubles.
+- The earlier repo's reported result (a Q-agent 61% better than random; 60.2% in a fresh run)
+  comes from a replay environment: the next state is the recorded next row whatever the
+  agent does, and every episode is the same 50 rows. It is recorded, never anchored to.
+- Environment: a stylised simulator, not a network model, on the earlier generator's action
+  physics and reward (load, SINR, interference, throughput, latency; five actions), plus load
+  couplings set once from their physical reasons: raising power in a loaded network raises
+  interference at neighbours (x (0.5 + load)^2); load balancing matters more under congestion
+  (latency cut x (load / 0.55)^2); congestion adds 20 x (load - 0.5) ms a step; a cell next
+  to an outage carries interference and load +0.3, and balancing its load pays 1.5 times
+  more. The agent observes SINR, interference and latency; load is hidden. Draws that exist
+  only for scenario events come from a child random stream.
+- Anchor: per-action mean one-step reward and state changes against a fresh run of the
+  earlier generator, with the couplings neutral: reward within 0.002, each change within 10%
+  (or 0.05).
+- Events: day 60, mean load +20% over 21 days (dynamics). Day 120, a neighbour outage on 10%
+  of cells (dynamics). Day 160, benign: measurement noise on SINR doubles (1 to 2 dB).
 - Evaluation: 50 fixed-seed episodes per environment version; the live policy, the new
-  policy and a static rule-based baseline all run the same episodes.
-- Retraining continues from the live Q-table (warm start).
-- Promotion: mean episode reward beats the live policy on the fixed episodes.
+  policy and the rule-based baseline run the same episodes. Retraining warm-starts from the
+  live Q-table.
+- Exception to the rule 8 promotion expectation: before building, each real event's retrain
+  gain was tested against twice the noise of retraining on an unchanged environment, with two
+  learner settings each set once. Neither passed (the second: load +0.026, outage -0.046,
+  against 0.058). In the full loop the events moved the live reward by at most 0.013, inside
+  the retrain trigger, so nothing was retrained or promoted.
+- Promotion: mean episode reward beats the live policy by 0.0824 (twice the largest noise
+  gain) on the fixed episodes.
 
 ## Tests every generator carries
 

@@ -1,0 +1,24 @@
+# Netopt drift calendar (docs/generators.md). Parameter names match
+# generator.BASE_PARAMS; each value is where the parameter ends once the event has ramped in.
+start: 2026-01-01
+days: 180
+base_seed: 42
+events:
+  - name: load_growth
+    day: 60
+    ramp_days: 21
+    kind: dynamics
+    params: {load_mult: 1.2}
+    benign: false
+  - name: neighbour_outage
+    day: 120
+    ramp_days: 0
+    kind: dynamics
+    params: {outage_share: 0.1}
+    benign: false
+  - name: sinr_measurement_noise
+    day: 160
+    ramp_days: 0
+    kind: dynamics
+    params: {sinr_noise_sd: 2.0}
+    benign: true
