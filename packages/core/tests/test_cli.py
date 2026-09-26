@@ -43,5 +43,5 @@ def test_unknown_use_case_names_the_known_ones() -> None:
 
 
 def test_production_components_are_not_wired_yet(tmp_path: Path) -> None:
-    with pytest.raises(NotImplementedError, match="not wired"):
+    with pytest.raises(NotImplementedError, match="evaluators are not wired"):
         build_components(tmp_path)
