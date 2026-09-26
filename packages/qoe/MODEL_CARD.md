@@ -63,8 +63,10 @@ a child random stream, so adding the event leaves every other session unchanged.
 - Device growth (day 40, benign): dataset drift and a retrain from day 58 as the ramp built
   up; never promoted.
 - Codec change (day 90): retrained from day 91, promoted on day 101 (MAE -0.0079).
-- Cloud gaming (day 150): retrained from day 151, promoted on day 151 (MAE -0.0080) and again
-  on day 157 (MAE -0.128) once a week of cloud sessions was in the window.
+- Cloud gaming (day 150): retrained from day 151. The day-151 promotion (MAE -0.0080) came
+  from a candidate whose training window ended on day 144, before cloud gaming appeared: a
+  refresh on recent data, not the loop learning the new class. The learning promotion is day
+  157 (MAE -0.128), the first candidate trained on cloud sessions.
 - Day 179: live model v4, MAE 0.370.
 
 ## Day-0 anchor to the earlier work
