@@ -215,6 +215,9 @@ class UseCase(ABC):
     usecase_id: int
     evaluation: EvaluationKind
     drift_test: DriftTest
+    # Why a real event is not expected to be promoted here (docs/generators.md rule 8), or
+    # None when every real event is.
+    rule8_exception: str | None
     # Longest label delay in days; the core looks this far back to collect released labels.
     max_label_delay_days: int
     train_window_days: int

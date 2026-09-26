@@ -19,6 +19,7 @@ from telecom_ml_core.drift import EvidentlyDrift
 from telecom_ml_core.evaluate import HoldoutEvaluator, RolloutEvaluator
 from telecom_ml_core.pipeline import Components, run_loop
 from telecom_ml_core.registry import MlflowRegistry, sqlite_uri
+from telecom_ml_core.report import model_card_path, summary
 from telecom_ml_core.validate import SchemaValidator
 
 ENTRY_POINT_GROUP = "telecom_ml.usecases"
@@ -84,6 +85,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     loop.add_argument("--days", type=int, required=True, help="number of simulated days")
     loop.add_argument("--state", type=Path, default=DEFAULT_STATE_DIR, help="run state folder")
+    report = sub.add_parser("report", help="write the results summary of a run's promotion logs")
+    report.add_argument("--state", type=Path, required=True, help="run state folder")
+    report.add_argument("--out", type=Path, required=True, help="Markdown file to write")
     return parser
 
 
@@ -107,6 +111,9 @@ def run(
             sys.stdout.write(f"{name}\n")
         return 0
 
+    if args.command == "report":
+        return write_report(args.state, args.out, usecases)
+
     if args.usecase == "all":
         names = list(usecases)
     elif args.usecase in usecases:
@@ -125,6 +132,31 @@ def run(
             f"{name}: {len(decisions)} days to {decisions[-1].day}, drift on {drifted}, "
             f"retrained {retrained}, promoted {promoted}"
         )
+    return 0
+
+
+def write_report(state_dir: Path, out: Path, usecases: dict[str, Callable[[], UseCase]]) -> int:
+    """Write the results summary for every use case with a promotion log under `state_dir`.
+
+    Raises:
+        FileNotFoundError: when the state folder holds no promotion logs.
+    """
+    log_dir = state_dir / "promotion_log"
+    logged = sorted(p.stem for p in log_dir.glob("*.jsonl")) if log_dir.is_dir() else []
+    if not logged:
+        raise FileNotFoundError(f"no promotion logs under {log_dir}")
+    unknown = [name for name in logged if name not in usecases]
+    if unknown:
+        raise SystemExit(f"promotion logs for use cases that are not installed: {unknown}")
+    registry = MlflowRegistry(sqlite_uri(state_dir), state_dir / "mlartifacts", log_dir)
+    root = Path.cwd()
+    entries = []
+    for name in logged:
+        usecase = usecases[name]()
+        entries.append((usecase, registry.decisions(name), model_card_path(usecase, root)))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(summary(entries))
+    log.info(f"wrote {out} for {', '.join(logged)}")
     return 0
 
 

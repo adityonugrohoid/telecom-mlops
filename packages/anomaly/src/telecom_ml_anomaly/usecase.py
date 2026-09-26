@@ -43,6 +43,7 @@ class AnomalyUseCase(UseCase):
     # One row per cell per day is 50 rows a day; Wasserstein at a fixed 0.1 flags that much
     # sampling noise, the KS test accounts for it.
     drift_test = "ks"
+    rule8_exception = None
     max_label_delay_days = generator.LABEL_DELAY_DAYS
     train_window_days = 30
     eval_window_days = 14
