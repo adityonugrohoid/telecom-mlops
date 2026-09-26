@@ -70,10 +70,17 @@ and keeps the earlier unsupervised model as its baseline.
 | scenario off, 180 days | 0 | 0 | 0 |
 | scenario on, 180 days | 24 | 0 | 2, on days 63 and 129 |
 
-- Demand growth (day 50): alerts on normal hours rose and triggered a retrain on day 54;
-  promoted on day 63 (F1 +0.060, normal-hour alerts 1.17% to 0.38%).
+- Demand growth (day 50): alerts on normal hours rose and triggered a retrain on day 54. The
+  day-63 promotion (F1 +0.060, normal-hour alerts 1.17% to 0.38%) was a refresh, not a
+  response to the event: its candidate trained on labels released up to day 49, before demand
+  growth began, and beat the bootstrap model because it had more triage labels (the live
+  detector's alerts now among them). In the loop, demand growth was never learned. What a
+  retrain on post-event data can do is shown by the experiment made while designing the event:
+  a detector trained before it scored F1 0.924 with 0.78% alerts on normal hours, one
+  retrained after it 0.987 with 0.02%.
 - Intermittent outages (day 110): F1 fell and triggered a retrain on day 115; promoted on
-  day 129 (F1 +0.044).
+  day 129 (F1 +0.044), a candidate trained on post-event labels: the loop learned the new
+  type.
 - Weekend smoothing (day 155, benign): not detected at all (no retrain) and never promoted,
   so this use case does not show the "detected, retrained, not promoted" path; churn and root
   cause do.

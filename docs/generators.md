@@ -136,6 +136,9 @@ each use case simulates.
   below its value at promotion, alerts on normal hours 0.005 above it.
 - Promotion: F1 beats the live model by 0.043, and alerts on normal hours rise by no more
   than 0.0038 (each twice its noise), on the audit sample of the last 14 days.
+- Result on the full calendar: the outage was learned (promoted on day 129 from post-event
+  labels). Demand growth was not: the day-63 promotion trained on labels released before the
+  event and won on more triage labels, a refresh.
 
 ### qoe
 
