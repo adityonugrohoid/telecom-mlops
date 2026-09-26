@@ -20,8 +20,9 @@ each package). Reproducing those results is how the findings below came to light
   contract, with an intercept for a 15% churn rate), the 17 raw and 27 engineered features,
   XGBoost with its hyperparameters, and the logistic regression baseline.
 - Found:
-  - The generator built its timestamps from the current clock (`pd.Timestamp.now()`), so no
-    two runs produced the same data. Here every day is seeded by its date.
+  - The generator built its timestamps from the current clock (`pd.Timestamp.now()`), so the
+    same seed produced different data on different days. Here every day is seeded by its
+    date.
   - It solved the intercept again for every sample, which would erase any drift in the churn
     rate. Here it is solved once, on the scenario-off distribution.
   - Its own evidence has the logistic baseline ahead of XGBoost (AUROC 0.8727 against
