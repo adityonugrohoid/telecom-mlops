@@ -56,6 +56,7 @@ class ToyUseCase(UseCase):
     usecase_id = 99
     evaluation = "holdout"
     drift_test = "auto"
+    rule8_exception = None
     max_label_delay_days = LABEL_DELAY_DAYS
     train_window_days = 5
     eval_window_days = 3

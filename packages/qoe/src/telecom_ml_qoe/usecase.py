@@ -38,6 +38,7 @@ class QoEUseCase(UseCase):
     usecase_id = generator.USECASE_ID
     evaluation = "holdout"
     drift_test = "auto"
+    rule8_exception = None
     max_label_delay_days = generator.LABEL_DELAY_DAYS
     train_window_days = 14
     eval_window_days = 7

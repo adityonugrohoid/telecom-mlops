@@ -57,6 +57,12 @@ class NetOptUseCase(UseCase):
     usecase_id = generator.USECASE_ID
     evaluation = "rollout"
     drift_test = "ks"
+    rule8_exception = (
+        "Tested before building, warm-start retraining did not beat the live policy by twice "
+        "its own noise on either real event, with two learner settings each set once. In the "
+        "loop the events moved the live reward by at most 0.013, inside the retrain trigger, "
+        "so nothing was retrained or promoted."
+    )
     max_label_delay_days = generator.LABEL_DELAY_DAYS
     train_window_days = 1
     eval_window_days = 1

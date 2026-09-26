@@ -18,14 +18,19 @@ from telecom_ml_core.pipeline import DataSource
 
 
 class HoldoutEvaluator:
+    def train_window(self, usecase: UseCase, day: date) -> tuple[date, date]:
+        """The release days a candidate retrained on `day` learns from: the
+        `train_window_days` before the evaluation window."""
+        last = day - timedelta(days=usecase.eval_window_days)
+        return last - timedelta(days=usecase.train_window_days - 1), last
+
     def training_data(self, usecase: UseCase, day: date, source: DataSource) -> pd.DataFrame:
         """Rows released in the `train_window_days` before the evaluation window.
 
         Raises:
             ValueError: when no labelled rows were released in the window.
         """
-        last = day - timedelta(days=usecase.eval_window_days)
-        first = last - timedelta(days=usecase.train_window_days - 1)
+        first, last = self.train_window(usecase, day)
         train = source.released(first, last)
         if train.empty:
             raise ValueError(f"{usecase.name} {day}: no labels released in {first}..{last}")

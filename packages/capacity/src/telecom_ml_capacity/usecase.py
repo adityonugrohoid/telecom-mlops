@@ -36,6 +36,12 @@ class CapacityUseCase(UseCase):
     evaluation = "holdout"
     # One row per cell per day is 60 rows a day; see anomaly for why KS suits small frames.
     drift_test = "ks"
+    rule8_exception = (
+        "A forecaster on same-hour lags tracks growth through its lags, so the growth events "
+        "are detected and may retrain but a new model is not expected to win. The use case "
+        "shows the other side: models retrained on the holiday week forecast worse after it, "
+        "and the gate refuses them."
+    )
     max_label_delay_days = generator.LABEL_DELAY_DAYS
     train_window_days = 28
     eval_window_days = 14
