@@ -4,7 +4,9 @@ Six telecom machine-learning use cases (churn, root cause, anomaly detection, Qo
 forecasting and network optimization) on one MLOps pipeline that runs a daily drift loop:
 validate the day's data, detect drift, retrain, and promote a new model only when it beats
 the live one by more than noise. The data and environments are simulated, each use case on
-its own generator with a scripted drift calendar; the automation is real. What sets it apart
+its own generator with a scripted drift calendar; the automation is real. It is for anyone
+who wants to see a model's life after deployment end to end, on data they can rebuild
+exactly. What sets it apart
 is that every result is honest about what the loop did, including where it learned nothing,
 refused a worse model, or correctly left a model alone.
 
