@@ -122,6 +122,9 @@ def _day(value: int | None) -> str:
     return "none" if value is None else str(value)
 
 
+NOT_REACHED = "not reached in this run"
+
+
 def _promotions(promotions: tuple[Promotion, ...]) -> str:
     if not promotions:
         return "none"
@@ -143,11 +146,18 @@ def section(usecase: UseCase, decisions: list[dict[str, Any]], model_card: str) 
         "| Event | Day | Kind | First dataset drift | First retrain | Promotions |",
         "|---|---|---|---|---|---|",
     ]
+    last_index = _index(usecase, decisions[-1]["day"])
     for o in found:
         label = " + ".join(e.name for e in o.events)
         if all(e.benign for e in o.events):
             label += " (benign)"
         kinds = " + ".join(dict.fromkeys(e.kind for e in o.events))
+        if o.events[0].day > last_index:
+            lines.append(
+                f"| {label} | {o.events[0].day} | {kinds} | {NOT_REACHED} | "
+                f"{NOT_REACHED} | {NOT_REACHED} |"
+            )
+            continue
         lines.append(
             f"| {label} | {o.events[0].day} | {kinds} | {_day(o.first_dataset_drift)} | "
             f"{_day(o.first_retrain)} | {_promotions(o.promotions)} |"
@@ -155,6 +165,9 @@ def section(usecase: UseCase, decisions: list[dict[str, Any]], model_card: str) 
     benign = [o for o in found if all(e.benign for e in o.events)]
     lines.append("")
     for o in benign:
+        if o.events[0].day > last_index:
+            lines.append(f"Benign event: {NOT_REACHED}.")
+            continue
         detected = o.first_retrain is not None or o.first_dataset_drift is not None
         lines.append(
             f"Benign event: {'detected' if detected else 'not detected'}, "

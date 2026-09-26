@@ -60,6 +60,15 @@ def test_events_starting_the_same_day_share_one_row(decisions: list[dict[str, ob
     assert "| threshold_moves + twin | 5 | concept |" in text
 
 
+def test_events_after_the_last_day_are_marked_not_reached(
+    decisions: list[dict[str, object]],
+) -> None:
+    text = summary([(ToyUseCase(), decisions[:15], "card")])
+    assert "| z_shift (benign) | 20 | covariate | not reached in this run |" in text
+    assert "Benign event: not reached in this run." in text
+    assert "| threshold_moves | 5 |" in text
+
+
 def test_rule8_exception_is_read_from_the_use_case(decisions: list[dict[str, object]]) -> None:
     class Excepted(ToyUseCase):
         rule8_exception = "Lags absorb the change."
