@@ -74,7 +74,9 @@ and keeps the earlier unsupervised model as its baseline.
   promoted on day 63 (F1 +0.060, normal-hour alerts 1.17% to 0.38%).
 - Intermittent outages (day 110): F1 fell and triggered a retrain on day 115; promoted on
   day 129 (F1 +0.044).
-- Weekend smoothing (day 155, benign): no retrain, never promoted.
+- Weekend smoothing (day 155, benign): not detected at all (no retrain) and never promoted,
+  so this use case does not show the "detected, retrained, not promoted" path; churn and root
+  cause do.
 - Day 179: live model v3, F1 0.915, recall on the outage type 0.36.
 
 With a 10% audit the noise was twice as large (F1 +0.036, margin 0.072). The outage was
