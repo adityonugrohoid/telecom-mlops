@@ -23,6 +23,7 @@ resolution-markers = [
 [manifest]
 members = [
     "telecom-ml-anomaly",
+    "telecom-ml-capacity",
     "telecom-ml-churn",
     "telecom-ml-core",
     "telecom-ml-qoe",
@@ -4077,6 +4078,21 @@ requires-dist = [
 ]
 
 [[package]]
+name = "telecom-ml-capacity"
+version = "0.1.0"
+source = { editable = "packages/capacity" }
+dependencies = [
+    { name = "lightgbm" },
+    { name = "telecom-ml-core" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "lightgbm", specifier = ">=4.7" },
+    { name = "telecom-ml-core", editable = "packages/core" },
+]
+
+[[package]]
 name = "telecom-ml-churn"
 version = "0.1.0"
 source = { editable = "packages/churn" }
@@ -4156,6 +4172,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "telecom-ml-anomaly" },
+    { name = "telecom-ml-capacity" },
     { name = "telecom-ml-churn" },
     { name = "telecom-ml-core" },
     { name = "telecom-ml-qoe" },
@@ -4182,6 +4199,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "telecom-ml-anomaly", editable = "packages/anomaly" },
+    { name = "telecom-ml-capacity", editable = "packages/capacity" },
     { name = "telecom-ml-churn", editable = "packages/churn" },
     { name = "telecom-ml-core", editable = "packages/core" },
     { name = "telecom-ml-qoe", editable = "packages/qoe" },

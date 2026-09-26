@@ -1,0 +1,27 @@
+# Capacity drift calendar (docs/generators.md). Parameter names match
+# generator.BASE_PARAMS; each value is where the parameter ends once the event has ramped in.
+start: 2026-01-01
+days: 180
+base_seed: 42
+events:
+  # 2% per month on every cell, linear from the calendar start: +12% by day 180.
+  - name: steady_growth
+    day: 0
+    ramp_days: 180
+    kind: trend
+    params: {growth_level: 1.12}
+    benign: false
+  # 15 cells move from 2% to 5% per month: an extra 3% per month from day 70.
+  - name: fast_growth_cells
+    day: 70
+    ramp_days: 110
+    kind: trend
+    params: {fast_growth_extra: 1.11}
+    benign: false
+  - name: holiday_week
+    day: 130
+    ramp_days: 0
+    duration_days: 7
+    kind: covariate
+    params: {holiday_mult: 1.8}
+    benign: true
