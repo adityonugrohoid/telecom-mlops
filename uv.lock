@@ -24,6 +24,7 @@ resolution-markers = [
 members = [
     "telecom-ml-churn",
     "telecom-ml-core",
+    "telecom-ml-root-cause",
     "telecom-mlops",
 ]
 
@@ -4081,12 +4082,30 @@ requires-dist = [
 ]
 
 [[package]]
+name = "telecom-ml-root-cause"
+version = "0.1.0"
+source = { editable = "packages/root-cause" }
+dependencies = [
+    { name = "scikit-learn" },
+    { name = "telecom-ml-core" },
+    { name = "xgboost" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "scikit-learn", specifier = ">=1.9" },
+    { name = "telecom-ml-core", editable = "packages/core" },
+    { name = "xgboost", specifier = ">=3.2" },
+]
+
+[[package]]
 name = "telecom-mlops"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "telecom-ml-churn" },
     { name = "telecom-ml-core" },
+    { name = "telecom-ml-root-cause" },
 ]
 
 [package.dev-dependencies]
@@ -4110,6 +4129,7 @@ dev = [
 requires-dist = [
     { name = "telecom-ml-churn", editable = "packages/churn" },
     { name = "telecom-ml-core", editable = "packages/core" },
+    { name = "telecom-ml-root-cause", editable = "packages/root-cause" },
 ]
 
 [package.metadata.requires-dev]

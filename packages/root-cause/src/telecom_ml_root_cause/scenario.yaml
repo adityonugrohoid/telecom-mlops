@@ -1,0 +1,24 @@
+# Root-cause drift calendar (docs/generators.md). Parameter names match
+# generator.BASE_PARAMS; each value is where the parameter ends once the event has ramped in.
+start: 2026-01-01
+days: 180
+base_seed: 42
+events:
+  - name: firmware_rollout
+    day: 30
+    ramp_days: 0
+    kind: concept
+    params: {config_error_late_root_share: 0.5}
+    benign: false
+  - name: power_supply_faults
+    day: 90
+    ramp_days: 0
+    kind: new_class
+    params: {power_supply_share: 0.1}
+    benign: false
+  - name: incident_volume_growth
+    day: 150
+    ramp_days: 0
+    kind: prior
+    params: {incident_rate: 42.0}
+    benign: true

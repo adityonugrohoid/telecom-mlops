@@ -22,7 +22,11 @@ each use case simulates.
    evidence file (and the anomaly README's precision 0.95, recall 0.38 and F1 0.70 cannot
    hold at one threshold), so their anchor is a fresh run of the earlier repo's code at its
    last commit and default seed, in a separate environment on that repo's own pinned
-   versions, with the numbers, versions and commit recorded.
+   versions, with the numbers, versions and commit recorded. When an evidence figure proves
+   to be a small-split artifact (root cause's first-alarm 0.58 came from one 100-incident
+   test split), the anchor is the generator's distribution at scale against a fresh run of
+   the earlier generator, plus the evidence setup within a stated tolerance; the model card
+   states the earlier figure's origin and the spread across split seeds.
 4. Ground truth is recorded. Each batch returns its data plus a manifest: the scenario
    events active that day and their strength. The manifest never reaches the model; the
    report uses it to show when drift was injected against when the loop detected it
@@ -45,6 +49,14 @@ each use case simulates.
    retrains every day: at least twice the largest gain seen there from noise alone. With
    the scenario off, a full calendar must promote nothing; with it on, the benign event
    must promote nothing. Each use case's model card records these runs.
+
+   Drift checks run on a frame whose rows are close to independent: one row per customer,
+   per incident (not per alarm event), per cell per day (not per cell-hour), per session,
+   per environment episode. A value that is constant within a day, such as a daily count,
+   is a use-case metric, never a drift column. The scenario-off run reports its drift-flag
+   days, which must stay at or below 10% of the calendar, or detection delays mean nothing.
+   Input drift triggers a retrain on dataset drift (at least half the monitored columns
+   drifted) unless the use case states another rule and its reason.
 9. Every calendar holds one benign event: a real input shift that does not hurt the
    model. The loop should detect it, may retrain, and should not promote. That shows the
    promotion gate working.
@@ -71,19 +83,34 @@ each use case simulates.
   model first sees post-drift labels at about event day + 30 (label delay) + 14 (window).
   The price rise at day 60 is learnable from about day 104; the benign event sits at day
   150 so the two do not overlap.
+- Input drift: any single monitored column drifting triggers a retrain, not dataset drift,
+  because the price rise moves one input (charges) out of thirteen. The scenario-off run
+  retrained on 3 of 180 days.
 
 ### root-cause
 
-- Batch: 15 incidents per day, about 20 alarm events each, 50 cells. Label delay: 1 to 7
-  days per incident (ticket closure), drawn per incident.
+- Batch: incidents per day drawn from Poisson(30), about 20 alarm events each, 50 cells.
+  Label delay: 1 to 7 days per incident (ticket closure), drawn per incident.
 - Model of the data: the earlier cascade model (a root event, cascading alarms with
   severity decay, five event types).
-- Events: day 45, firmware rollout: in 30% of config_error incidents the first alarm is no
-  longer the root (concept). Day 100, a new root cause class `power_supply`, unseen by the
-  live model, at 10% of incidents (new_class); the unknown-signature share is the drift
-  signal. Day 140, benign: incident volume +40% with unchanged mechanics.
-- Promotion: top-1 hit rate beats the live model on incidents released in the last 21
-  days.
+- Events: day 30, firmware rollout: in 50% of config_error incidents the first alarm is no
+  longer the root (concept). Day 90, a new root cause class `power_supply` at 10% of
+  incidents (new_class): its root alarm arrives late (sequence position 2 to 4, after the
+  first symptoms), with small KPI deltas (about 30% of a normal root), 3 to 8 affected
+  cells and severity major. Its one-hot column exists from day 0 and is 0 before day 90.
+  Day 150, benign: the incident rate rises 40% (30 to 42 per day) with unchanged mechanics.
+- Volume and noise: at 15 incidents per day and a 30% firmware share, the noise from
+  retraining alone (top-1 +0.047) swamped the firmware event's real gain (+0.031). Doubling
+  the volume halved the noise (+0.0213), and the 50% share raised the firmware gain to
+  about +0.06.
+- Drift: checked on one row per incident (strongest KPI impact, spread, mean lag, first
+  alarm type and severity), since the 20 events of an incident share one impact. Retrain
+  triggers: dataset drift on that frame; any event type the live model never saw
+  (`unknown_signature_share` above 0, the new-class signal); top-1 falling 0.05 below its
+  value at promotion; incidents per day over the evaluation window moving more than 20%
+  from their value at promotion (the daily count is a metric, not a drift column).
+- Promotion: top-1 hit rate beats the live model by 0.043 (twice the largest noise gain) on
+  incidents released in the last 21 days.
 
 ### anomaly
 
