@@ -47,9 +47,9 @@ target-version = "py312"
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.pytest.ini_options]
-testpaths = ["packages"]
+testpaths = ["packages", "docs"]
 addopts = "--import-mode=importlib"
-pythonpath = ["packages/core/tests"]
+pythonpath = ["packages/core/tests", "docs/figures"]
 
 [tool.mypy]
 python_version = "3.12"
