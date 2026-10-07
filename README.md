@@ -6,9 +6,8 @@ validate the day's data, detect drift, retrain, and promote a new model only whe
 the live one by more than noise. The data and environments are simulated, each use case on
 its own generator with a scripted drift calendar; the automation is real. It is for anyone
 who wants to see a model's life after deployment end to end, on data they can rebuild
-exactly. What sets it apart
-is that every result is honest about what the loop did, including where it learned nothing,
-refused a worse model, or correctly left a model alone.
+exactly. What sets it apart is that every result says what the loop did, including where it
+learned nothing, refused a worse model, or correctly left a model alone.
 
 ## Quickstart
 
@@ -75,7 +74,7 @@ Results of the full calendar, 180 simulated days from 2026-01-01:
 | [churn](packages/churn/MODEL_CARD.md) | a price rise makes customers more sensitive to charges; benign: 5G share grows | learned the price rise (promoted six times from day 110); detected the benign shift, never promoted |
 | [root cause](packages/root-cause/MODEL_CARD.md) | a firmware rollout moves the root alarm; a new fault class appears; benign: incident volume grows | learned both (promoted on days 64 and 115); detected the benign growth, never promoted |
 | [anomaly](packages/anomaly/MODEL_CARD.md) | new demand congests some cells; a new anomaly type appears; benign: weekend traffic smooths | learned the new type (day 129); the day-63 promotion was a refresh on older data, and the demand growth was never learned |
-| [qoe](packages/qoe/MODEL_CARD.md) | benign: more high-end devices; a video codec change; cloud gaming arrives | learned the codec (day 101) and cloud gaming (day 157); the benign shift was detected and retrained on, never promoted |
+| [qoe](packages/qoe/MODEL_CARD.md) | benign: more high-end devices; a video codec change; cloud gaming arrives | learned the codec (day 101) and cloud gaming (day 157, after a refresh on day 151); the benign shift was detected and retrained on, never promoted |
 | [capacity](packages/capacity/MODEL_CARD.md) | steady and faster growth; benign: a holiday week | nothing promoted: the lag features already track growth, and the gate refused every model retrained on the holiday week |
 | [netopt](packages/netopt/MODEL_CARD.md) | load grows; a neighbour outage; benign: noisier SINR readings | nothing detected or retrained: the events barely moved the live policy's reward |
 
