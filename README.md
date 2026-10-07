@@ -52,6 +52,19 @@ schema, features, model, baseline and calendar, and imports nothing from another
 one never moves another's results. Live models, per-day runs and the promotion log live in a
 local MLflow store under the state folder, which is never committed.
 
+## The moving split
+
+Each day, a use case trains on older answers and tests on the most recent ones, and both
+windows move forward one day with the calendar. Windows count by when an answer arrived, so a
+use case whose answers come late (churn waits 30 days) learns from older data than one whose
+answers come at once. The full picture, including why promotions lag the events behind them,
+is in [docs/moving-split.md](docs/moving-split.md).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/split-day-110-dark.svg">
+  <img alt="Train and test windows of the five holdout use cases on day 110, by answer release day and by the days the rows were generated." src="docs/figures/split-day-110-light.svg">
+</picture>
+
 ## The six use cases
 
 Results of the full calendar, 180 simulated days from 2026-01-01:
@@ -108,7 +121,7 @@ packages/
     tests/                   generator rules, day-0 anchor, use-case binding
     MODEL_CARD.md
 results/         committed summaries, chosen runs only
-docs/            generators.md, earlier-work.md
+docs/            generators.md, earlier-work.md, moving-split.md, figures/ (drawn by a script)
 ```
 
 ## Tests and CI
