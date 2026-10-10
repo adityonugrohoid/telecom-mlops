@@ -93,6 +93,11 @@ learning. Across the six use cases the outcomes spread over four kinds:
 - **Left alone**: the event did not hurt the live model enough to act on (network
   optimization).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/events-to-promotions-dark.svg">
+  <img alt="For each event with a promotion: the day it began, the wait until a model could learn it, and the days a model was promoted, filled for learned and hollow for refresh." src="docs/figures/events-to-promotions-light.svg">
+</picture>
+
 Two use cases state in their model cards why no promotion was expected. Each use case's day 0
 is also tested against the measured result of the earlier repo it was ported from; what those
 ports found is in [docs/earlier-work.md](docs/earlier-work.md). The generator rules are in
